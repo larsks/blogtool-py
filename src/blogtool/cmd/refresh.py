@@ -4,10 +4,10 @@ import datetime
 import logging
 
 from itertools import zip_longest
-
-import blogtool.post
+from pathlib import Path
 
 from blogtool.itertools import takeuntil
+from blogtool.post import Post
 
 LOG = logging.getLogger(__name__)
 
@@ -60,14 +60,16 @@ def find_posts(ctx, branch, merge_base):
         LOG.debug('examining commit %s', cur)
         diff_index = prev.diff(cur)
         for diff in diff_index:
+            LOG.debug('change_type %s a_path %s b_path %s',
+                      diff.change_type, diff.a_path, diff.b_path)
             if diff.change_type in ['A', 'R']:
                 if diff.a_path.startswith('post/'):
                     LOG.info('found post %s', diff.b_path)
-                    posts.add(diff.b_path)
+                    posts.add(Path(diff.b_path))
 
             if diff.change_type in ['R', 'D']:
                 LOG.debug('discarding %s', diff.a_path)
-                posts.discard(diff.a_path)
+                posts.discard(Path(diff.a_path))
 
         cur = cur.parents[0]
 
@@ -104,17 +106,24 @@ def refresh(ctx, draft_name):
             raise click.ClickException(f'no posts in {draft_name}')
 
         now = datetime.datetime.now()
-        now_str = now.strftime('%Y-%m-%d')
 
-        for post in posts:
-            p = blogtool.post.Post(post)
-            old_path, new_path = p.change_date(now)
+        for path in posts:
+            post = Post.from_file(path)
+            post.date = now
+            new_path = path.parent / post.filename
 
-            ctx.repo.git.add(old_path)
-            ctx.repo.git.add(new_path)
+            if new_path != path:
+                LOG.info('renaming %s -> %s', path, new_path)
+                with new_path.open('w') as fd:
+                    fd.write(post.to_string())
+
+                path.unlink()
+
+                ctx.repo.git.add(path)
+                ctx.repo.git.add(new_path)
 
         if ctx.repo.index.diff('HEAD'):
             LOG.info('committing changes')
-            ctx.repo.git.commit(message=f'updated to date {now_str}')
+            ctx.repo.git.commit(message=f'updated to date {now.strftime("%Y-%m-%d")}')
         else:
             LOG.info('no changes')
