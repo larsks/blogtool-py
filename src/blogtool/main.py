@@ -28,7 +28,11 @@ class Context:
 @click.option('--post-directory', '-P', default='post/', type=Path)
 @click.pass_context
 def main(ctx, verbose, main_branch, post_directory):
-    repo = git.Repo(search_parent_directories=True)
+    try:
+        repo = git.Repo(search_parent_directories=True)
+    except git.exc.InvalidGitRepositoryError:
+        raise click.ClickException(
+            'blogtool must be run from inside a git repository')
 
     ctx.obj = Context(
         repo=repo,
