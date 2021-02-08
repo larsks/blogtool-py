@@ -86,9 +86,6 @@ class Post:
             if k not in cls.exclude_from_import
         }
 
-        if metadata['date']:
-            metadata['date'] = cls.parse_date(metadata['date'])
-
         return cls(content=content, **metadata)
 
     @staticmethod
@@ -108,7 +105,7 @@ class Post:
 
         data = stripped(fd)
 
-        if next(data) != '---':
+        if next(data, None) != '---':
             return {}
 
         lines = takeuntil(lambda line: line == '---', data, include_match=False)
