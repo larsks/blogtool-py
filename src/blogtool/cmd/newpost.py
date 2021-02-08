@@ -34,7 +34,11 @@ def newpost(ctx, tags, categories, date, stub, git, stdout,
     )
 
     path = ctx.post_directory / post.filename
+    if path.is_file():
+        raise click.ClickException(f'a post named {path} already exists')
     branch = f'draft/{post.stub}'
+    if branch in ctx.repo.refs:
+        raise click.ClickException(f'a branch named {branch} already exists')
 
     with (sys.stdout if stdout else open(path, 'w')) as fd:
         fd.write(post.to_string())

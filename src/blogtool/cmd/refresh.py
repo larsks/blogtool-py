@@ -77,9 +77,10 @@ def find_posts(ctx, branch, merge_base):
 
 
 @click.command()
+@click.option('--date', '-d', type=Post.parse_date)
 @click.argument('draft_name')
 @click.pass_obj
-def refresh(ctx, draft_name):
+def refresh(ctx, date, draft_name):
     if not draft_name.startswith('draft/'):
         draft_name = f'draft/{draft_name}'
 
@@ -105,11 +106,14 @@ def refresh(ctx, draft_name):
         if len(posts) < 1:
             raise click.ClickException(f'no posts in {draft_name}')
 
-        now = datetime.datetime.now()
+        if date is None:
+            date = datetime.datetime.now()
+
+        LOG.info('setting date to %s', date.strftime('%Y-%m-%d'))
 
         for path in posts:
             post = Post.from_file(path)
-            post.date = now
+            post.date = date
             new_path = path.parent / post.filename
 
             if new_path != path:
@@ -124,6 +128,6 @@ def refresh(ctx, draft_name):
 
         if ctx.repo.index.diff('HEAD'):
             LOG.info('committing changes')
-            ctx.repo.git.commit(message=f'updated to date {now.strftime("%Y-%m-%d")}')
+            ctx.repo.git.commit(message=f'updated to date {date.strftime("%Y-%m-%d")}')
         else:
             LOG.info('no changes')
