@@ -2,6 +2,8 @@ import click
 import git
 import logging
 
+from pathlib import Path
+
 from dataclasses import dataclass
 
 import blogtool
@@ -17,18 +19,21 @@ LOG = logging.getLogger(__name__)
 class Context:
     repo: git.Repo = None
     main_branch: str = None
+    post_directory: str = None
 
 
 @click.group()
 @click.option('--verbose', '-v', count=True)
 @click.option('--main-branch', '-M', default='master')
+@click.option('--post-directory', '-P', default='post/', type=Path)
 @click.pass_context
-def main(ctx, verbose, main_branch):
+def main(ctx, verbose, main_branch, post_directory):
     repo = git.Repo(search_parent_directories=True)
 
     ctx.obj = Context(
         repo=repo,
         main_branch=main_branch,
+        post_directory=post_directory,
     )
 
     try:

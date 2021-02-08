@@ -7,15 +7,9 @@ from itertools import zip_longest
 
 import blogtool.post
 
+from blogtool.itertools import takeuntil
+
 LOG = logging.getLogger(__name__)
-
-
-def takeuntil(predicate, iterable):
-    '''return items from an iterable until predicate is true'''
-    for x in iterable:
-        yield x
-        if predicate(x):
-            break
 
 
 @contextlib.contextmanager
