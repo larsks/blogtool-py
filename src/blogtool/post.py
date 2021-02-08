@@ -129,6 +129,7 @@ class Post:
         }
 
         data['date'] = self.date_as_string
+        data['filename'] = self.filename
 
         return data
 
