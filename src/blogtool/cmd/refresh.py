@@ -78,15 +78,19 @@ def find_posts(ctx, branch, merge_base):
 
 @click.command()
 @click.option('--date', '-d', type=Post.parse_date)
-@click.argument('draft_name')
+@click.argument('draft_name', default='HEAD')
 @click.pass_obj
 def refresh(ctx, date, draft_name):
-    if not draft_name.startswith('draft/'):
-        draft_name = f'draft/{draft_name}'
+    if draft_name == 'HEAD':
+        draft_name = ctx.repo.head.ref.name
 
-    try:
-        branch = ctx.repo.refs[draft_name]
-    except IndexError:
+    for i in [draft_name, f'draft/{draft_name}']:
+        try:
+            branch = ctx.repo.refs[draft_name]
+            break
+        except IndexError:
+            pass
+    else:
         raise click.ClickException(f'no draft named {draft_name}')
 
     if ctx.repo.index.diff(None):

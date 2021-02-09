@@ -125,8 +125,7 @@ def test_main_refresh_with_explicit_date(repo_with_master, repodir, runner):
 
     branch = repo_with_master.head.ref
 
-    res = runner.invoke(blogtool.main.main,
-                        ['refresh', '-d', '2021-02-02', 'draft/test-post'])
+    res = runner.invoke(blogtool.main.main, ['refresh', '-d', '2021-02-02'])
     assert res.exit_code == 0
 
     expected_path = repodir / 'post' / '2021-02-02-test-post.md'
@@ -144,8 +143,7 @@ def test_main_refresh_with_unstaged_changes(repo_with_master, repodir, runner):
     assert expected_path.is_file()
 
     expected_path.unlink()
-    res = runner.invoke(blogtool.main.main,
-                        ['refresh', '-d', '2021-02-02', 'draft/test-post'])
+    res = runner.invoke(blogtool.main.main, ['refresh', '-d', '2021-02-02'])
     assert res.exit_code == 1
     assert res.stderr == 'Error: cannot operate when there are unstaged changes\n'
 
