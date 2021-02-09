@@ -134,6 +134,18 @@ def test_main_refresh_with_explicit_date(repo_with_master, repodir, runner):
     assert len(list(repo_with_master.iter_commits(branch))) == 3
 
 
+def test_main_refresh_with_explicit_date_explicit_branch(repo_with_master, repodir, runner):
+    res = runner.invoke(blogtool.main.main,
+                        ['newpost', '-g', '-d', '2021-01-01', 'Test post'])
+    assert res.exit_code == 0
+
+    repo_with_master.refs['master'].checkout()
+
+    res = runner.invoke(blogtool.main.main, ['refresh', '-d', '2021-02-02', 'draft/test-post'])
+    assert res.exit_code == 0
+    assert repo_with_master.head.ref.name == 'master'
+
+
 def test_main_refresh_with_unstaged_changes(repo_with_master, repodir, runner):
     res = runner.invoke(blogtool.main.main,
                         ['newpost', '-g', '-d', '2021-01-01', 'Test post'])
