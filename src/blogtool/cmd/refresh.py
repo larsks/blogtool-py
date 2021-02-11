@@ -122,13 +122,12 @@ def refresh(ctx, date, draft_name):
 
             if new_path != path:
                 LOG.info('renaming %s -> %s', path, new_path)
-                with new_path.open('w') as fd:
-                    fd.write(post.to_string())
-
                 path.unlink()
-
                 ctx.repo.git.add(path)
-                ctx.repo.git.add(new_path)
+
+            with new_path.open('w') as fd:
+                fd.write(post.to_string())
+            ctx.repo.git.add(new_path)
 
         if ctx.repo.index.diff('HEAD'):
             LOG.info('committing changes')
