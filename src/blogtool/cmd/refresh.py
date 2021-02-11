@@ -77,10 +77,11 @@ def find_posts(ctx, branch, merge_base):
 
 
 @click.command()
-@click.option('--date', '-d', type=Post.parse_date)
+@click.option('-d', '--date', type=Post.parse_date)
+@click.option('--commit/--no-commit', default=True)
 @click.argument('draft_name', default='HEAD')
 @click.pass_obj
-def refresh(ctx, date, draft_name):
+def refresh(ctx, date, commit, draft_name):
     if draft_name == 'HEAD':
         draft_name = ctx.repo.head.ref.name
 
@@ -130,7 +131,10 @@ def refresh(ctx, date, draft_name):
             ctx.repo.git.add(new_path)
 
         if ctx.repo.index.diff('HEAD'):
-            LOG.info('committing changes')
-            ctx.repo.git.commit(message=f'updated to date {date.strftime("%Y-%m-%d")}')
+            if commit:
+                LOG.info('committing changes')
+                ctx.repo.git.commit(message=f'updated to date {date.strftime("%Y-%m-%d")}')
+            else:
+                LOG.info('not committing changes')
         else:
             LOG.info('no changes')
