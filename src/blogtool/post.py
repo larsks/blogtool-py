@@ -10,8 +10,8 @@ from pathlib import Path
 from blogtool.itertools import takeuntil
 
 LOG = logging.getLogger(__name__)
-RE_FILENAME = re.compile(r'(?P<date>\d{4}-\d\d-\d\d)-(?P<stub>[^.]+)\.md')
-MAX_STUB_LENGTH = 30
+RE_FILENAME = re.compile(r'(?P<date>\d{4}-\d\d-\d\d)-(?P<slug>[^.]+)\.md')
+MAX_SLUG_LENGTH = 30
 
 
 def stripped(fd):
@@ -34,14 +34,14 @@ class Post:
 
     title: str
 
-    stub: str = field(default=None)
+    slug: str = field(default=None)
     date: datetime.datetime = field(default=None)
     tags: list[str] = field(default_factory=list)
     categories: list[str] = field(default_factory=list)
     weight: int = field(default=None)
     draft: bool = field(default=None)
     properties: dict = field(default_factory=dict)
-    stub: str = field(default=None)
+    slug: str = field(default=None)
     content: str = field(default='', repr=False)
 
     exclude_from_export = [
@@ -53,11 +53,11 @@ class Post:
         'filename',
     ]
 
-    max_stub_length = MAX_STUB_LENGTH
+    max_slug_length = MAX_SLUG_LENGTH
 
     def __post_init__(self):
-        if self.stub is None:
-            self.stub = Post.stub_from_title(self.title)
+        if self.slug is None:
+            self.slug = Post.slug_from_title(self.title)
 
         if self.date is None:
             self.date = datetime.datetime.now()
@@ -67,7 +67,7 @@ class Post:
 
     @property
     def filename(self):
-        return f'{self.date_as_string}-{self.stub}.md'
+        return f'{self.date_as_string}-{self.slug}.md'
 
     @classmethod
     def from_file(cls, path):
@@ -93,11 +93,11 @@ class Post:
         return datetime.datetime.strptime(s, '%Y-%m-%d')
 
     @classmethod
-    def stub_from_title(cls, title):
-        stub = ''.join(c for c in title
+    def slug_from_title(cls, title):
+        slug = ''.join(c for c in title
                        if c in string.ascii_letters + string.digits + '-_ '
-                       ).replace(' ', '-').lower()[:cls.max_stub_length]
-        return stub.rstrip('-')
+                       ).replace(' ', '-').lower()[:cls.max_slug_length]
+        return slug.rstrip('-')
 
     @classmethod
     def read_metadata(cld, fd):

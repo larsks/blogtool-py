@@ -38,7 +38,7 @@ def test_create_title():
     assert post.title == title
     assert all(getattr(now, x) == getattr(post.date, x)
                for x in ['year', 'month', 'day'])
-    assert post.stub == 'this-is-a-test'
+    assert post.slug == 'this-is-a-test'
     assert post.filename == now.strftime('%Y-%m-%d-this-is-a-test.md')
     assert post.tags == []
     assert post.categories == []

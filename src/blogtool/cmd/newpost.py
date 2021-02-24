@@ -8,7 +8,7 @@ from blogtool.post import Post
 @click.option('-t', '--tag', 'tags', multiple=True)
 @click.option('-c', '--category', 'categories', multiple=True)
 @click.option('-d', '--date')
-@click.option('-s', '--stub')
+@click.option('-s', '--slug')
 @click.option('-D', '--draft', is_flag=True)
 @click.option('-g', '--git', is_flag=True)
 @click.option('-G', '--git-add-only', is_flag=True)
@@ -16,7 +16,7 @@ from blogtool.post import Post
 @click.option('-w', '--weight', type=int)
 @click.argument('title')
 @click.pass_obj
-def newpost(ctx, tags, categories, date, stub, git, stdout,
+def newpost(ctx, tags, categories, date, slug, git, stdout,
             draft, weight, git_add_only, title):
 
     # FIXME: this needs to be configureable
@@ -28,7 +28,7 @@ def newpost(ctx, tags, categories, date, stub, git, stdout,
         tags=tags,
         categories=categories,
         date=date,
-        stub=stub,
+        slug=slug,
         draft=draft,
         weight=weight,
     )
@@ -36,7 +36,7 @@ def newpost(ctx, tags, categories, date, stub, git, stdout,
     path = ctx.post_directory / post.filename
     if path.is_file():
         raise click.ClickException(f'a post named {path} already exists')
-    branch = f'draft/{post.stub}'
+    branch = f'draft/{post.slug}'
     if branch in ctx.repo.refs:
         raise click.ClickException(f'a branch named {branch} already exists')
 
